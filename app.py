@@ -6,14 +6,10 @@ import seaborn as sns
 from scipy import stats
 import math
 import os
+import pathlib
 import warnings
 
 warnings.filterwarnings("ignore", category=FutureWarning)
-
-try:
-    load_all_data.clear()
-except Exception:
-    pass
 
 # ========================================
 # PAGE CONFIGURATION
@@ -48,36 +44,45 @@ sns.set_palette("husl")
 # DATA LOADING (data/ + data/train/)
 # ========================================
 @st.cache_data
-@st.cache_data
 def load_all_data():
     """
-    Robust loader for:
-      <repo_root>/data/supplementary_data.csv
-      <repo_root>/data/train/input_2023_w01.csv ... w18
-      <repo_root>/data/train/output_2023_w01.csv ... w18
-    """
-    import pathlib
+    Layout:
 
-    # Resolve absolute paths from this app.py location
+    NFL-Redzone-Analytics/
+      app.py
+      data/
+        supplementary_data.csv
+        train/
+          input_2023_w01.csv ... input_2023_w18.csv
+          output_2023_w01.csv ... output_2023_w18.csv
+    """
     app_dir = pathlib.Path(__file__).parent.resolve()
     data_dir = app_dir / "data"
     train_dir = data_dir / "train"
 
+    # Debug info
     st.write("app_dir:", app_dir)
-    st.write("data_dir exists:", data_dir.exists(), "contents:", list(data_dir.glob("*")))
-    st.write("train_dir exists:", train_dir.exists(), "contents:", list(train_dir.glob("*")))
+    st.write("data_dir exists:", data_dir.exists())
+    st.write("train_dir exists:", train_dir.exists())
+    if data_dir.exists():
+        st.write("data_dir contents:", [p.name for p in data_dir.iterdir()])
+    if train_dir.exists():
+        st.write("train_dir contents:", [p.name for p in train_dir.iterdir()])
 
     # ---------- supplementary ----------
     supp_path = data_dir / "supplementary_data.csv"
     try:
         st.info(f"⏳ Loading supplementary data from {supp_path} ...")
-        supp_df = pd.read_csv(supp_path)
+        # low_memory=False removes DtypeWarning about mixed types
+        supp_df = pd.read_csv(supp_path, low_memory=False)
         st.success(f"✅ Loaded supplementary data: {supp_df.shape}")
     except Exception as e:
-        st.error(f"❌ Error loading {supp_path.name}: {e}")
+        import traceback
+        st.error(f"❌ Error loading supplementary_data.csv: {e}")
+        st.code(traceback.format_exc())
         return pd.DataFrame(), pd.DataFrame(), pd.DataFrame()
 
-    # ---------- input ----------
+    # ---------- input (18 weeks) ----------
     st.info("⏳ Loading input tracking data (18 weeks)...")
     input_dfs = []
     for week in range(1, 19):
@@ -100,7 +105,7 @@ def load_all_data():
     input_df = pd.concat(input_dfs, ignore_index=True)
     st.success(f"✅ Loaded input data: {input_df.shape}")
 
-    # ---------- output ----------
+    # ---------- output (18 weeks) ----------
     st.info("⏳ Loading output tracking data (18 weeks)...")
     output_dfs = []
     for week in range(1, 19):
@@ -352,7 +357,7 @@ def get_enhanced_recommendations_final(yards_out, defense_type, play_summary, su
     }
 
 # ========================================
-# MAIN APP
+# MAIN APP (with try/except guard)
 # ========================================
 st.title("🏈 NFL Red Zone Analytics Dashboard")
 st.markdown("*Defender Distance & Separation Strategy Analysis*")
@@ -361,8 +366,9 @@ st.markdown("---")
 try:
     with st.spinner("Loading NFL data (this may take a moment)..."):
         supp_df, input_df, output_df = load_all_data()
+
         if supp_df.empty or input_df.empty or output_df.empty:
-            st.error("Data failed to load completely. Check logs for missing files.")
+            st.error("Data failed to load completely. See messages above for details.")
             st.stop()
 
         redzone_df, play_summary, successful_plays = process_data(supp_df, input_df, output_df)
@@ -373,6 +379,7 @@ except Exception as e:
     st.code(traceback.format_exc())
     st.stop()
 
+# ======= stats header =======
 c1, c2, c3 = st.columns(3)
 with c1:
     st.metric("📊 Total Plays", len(play_summary))
@@ -384,6 +391,7 @@ with c3:
 
 st.markdown("---")
 
+# ======= sidebar & analysis =======
 st.sidebar.header("🎛️ Analysis Parameters")
 yards_out = st.sidebar.slider("Distance from Endzone (yards)", 5, 20, 10, 1)
 available_covs = sorted(play_summary["team_coverage_man_zone"].dropna().unique().tolist())
