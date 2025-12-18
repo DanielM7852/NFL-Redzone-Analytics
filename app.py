@@ -45,18 +45,22 @@ sns.set_palette("husl")
 @st.cache_data
 def load_all_data():
     """
-    Expect this structure in the repo root:
+    Uses the layout visible in your screenshots:
 
+    NFL-Redzone-Analytics/
+      app.py
       data/
         supplementary_data.csv
+        nfl_redzone_playbook_optimal.csv
+        positioning_*.png
         train/
           input_2023_w01.csv ... input_2023_w18.csv
-          output_2023_w01.csv ... output_2023_w18.csv
+          output_2023_w01.csv ... output_2023_w18.csv   # you must add these
     """
     base_path = "data"
     train_folder = os.path.join(base_path, "train")
 
-    # Basic debug so you can see what Streamlit sees
+    # Basic debug so you can see what Streamlit Cloud sees
     st.write("CWD:", os.getcwd())
     st.write("Root files:", os.listdir())
 
@@ -67,7 +71,7 @@ def load_all_data():
     st.write("data/ files:", os.listdir(base_path))
 
     if not os.path.exists(train_folder):
-        st.error("❌ 'data/train/' folder not found. Create it and add input_2023_wXX.csv & output_2023_wXX.csv.")
+        st.error("❌ 'data/train/' folder not found. Create it and add the input_2023_wXX.csv and output_2023_wXX.csv files.")
         return pd.DataFrame(), pd.DataFrame(), pd.DataFrame()
 
     st.write("train/ files:", os.listdir(train_folder))
@@ -122,7 +126,7 @@ def load_all_data():
             st.warning(f"⚠️ Missing output file for week {week}: {fpath}")
 
     if not output_dfs:
-        st.error("❌ No output_2023_wXX.csv files found in data/train/.")
+        st.error("❌ No output_2023_wXX.csv files found in data/train/. Add them to unlock full functionality.")
         return supp_df, input_df, pd.DataFrame()
 
     output_df = pd.concat(output_dfs, ignore_index=True)
