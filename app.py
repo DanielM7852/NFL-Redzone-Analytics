@@ -358,12 +358,20 @@ st.title("🏈 NFL Red Zone Analytics Dashboard")
 st.markdown("*Defender Distance & Separation Strategy Analysis*")
 st.markdown("---")
 
-with st.spinner("Loading NFL data (this may take a moment)..."):
-    supp_df, input_df, output_df = load_all_data()
-    if supp_df.empty or input_df.empty or output_df.empty:
-        st.error("Data failed to load completely. Check logs for missing files or path issues.")
-        st.stop()
-    redzone_df, play_summary, successful_plays = process_data(supp_df, input_df, output_df)
+try:
+    with st.spinner("Loading NFL data (this may take a moment)..."):
+        supp_df, input_df, output_df = load_all_data()
+        if supp_df.empty or input_df.empty or output_df.empty:
+            st.error("Data failed to load completely. Check logs for missing files.")
+            st.stop()
+
+        redzone_df, play_summary, successful_plays = process_data(supp_df, input_df, output_df)
+
+except Exception as e:
+    import traceback
+    st.error(f"Unhandled error while initializing app: {e}")
+    st.code(traceback.format_exc())
+    st.stop()
 
 c1, c2, c3 = st.columns(3)
 with c1:
