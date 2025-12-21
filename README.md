@@ -21,16 +21,18 @@ In the end, we built a dashboard that allows coaches and players to make split-s
 ## Data Sets
 
 ### Train
-- 18 weeks of 0.1s frame intervals tracking every player for each play in every game.
-- 18 input files which included all passing plays (before the ball was thrown) with stats on player postioning as well as player profiles and ball landing positon.
-- 18 output files which included all passing plays (after the ball was released by QB) with stats on player positoning at frame intervals.
+- 18 weeks of player tracking data captured at 0.1-second frame intervals for every player, play, and game.
+- 18 input files containing all passing plays prior to the ball being thrown, including player positioning, player profiles, and ball landing position.
+- 18 output files containing all passing plays after the ball was released by the quarterback, with player positioning recorded at each frame interval.
+
 
 ### Supplementary
-- Additonal information on plays including catch result, formation (defense and offense), time elapsed, and play commentary.
+- Additional play-level information, including catch outcome, offensive and defensive formations, time elapsed, and play commentary.
   
 ---
 
 ## Methodolgy
+
 - Joined input, output, and supplementary datasets and used computational analysis to define new features, including ball catch position, closest defender distance, and defender position relative to the targeted receiver.
 - Calculated receiver acceleration using frame-by-frame displacement divided twice by the 0.1-second frame intervals, identified touchdown plays through string matching the keyword “TOUCHDOWN,” and binned the analysis into 5-yard recommendation intervals spanning 5–20 yards from the end zone.
 - Explored the data to identify initial trends and develop testable hypotheses.
@@ -43,19 +45,21 @@ In the end, we built a dashboard that allows coaches and players to make split-s
 
 ## Key Findings
 
-- The distribution of catch frequency by defender proximity is highly right-skewed, meaning most catches occur close to a defender.
-- This effect is even more pronounced in red zone plays, resulting in an even more extreme skew.
-
-
-- At low seperation distances (0.5-2.5) yards, recivers classified as in "front of the defender" are expected to catch the ball 10% more often than under normal conditions.
-- 
+- The distribution of catch frequency by defender proximity is highly right-skewed, with most catches occurring close to a defender, and this skew is even more pronounced in red zone plays.
+- At low separation distances (0.5-2.5) yards, receivers classified as in "front of the defender" are expected to catch the ball **at least** 10% more often than under normal conditions.
+- Precise receiver alignment is critical, and receiver acceleration has a greater impact later in the route rather than early on.
+- The dashboard provides success estimates that are nearly **three times** higher than the baseline red zone touchdown rate at comparable distances to the goal line.
 
 
 ---
 
 ## Going Forward
 
-Future enhancements could integrate quarterback performance metrics to account for passer accuracy, develop play sequencing recommendations to exploit defensive adjustments across drives, and expand beyond touchdown optimization to include success probabilities at any part of the field. The framework established here provides a robust foundation for ongoing NFL analytics innovation in a time where the power of data continues to increase.
+- Integrate quarterback performance metrics to account for passer accuracy.
+- Develop play-sequencing recommendations that exploit defensive adjustments across drives.
+- Expand the framework beyond touchdown optimization to model success probabilities across the entire field.
+- Build on the established framework to support continued innovation in NFL analytics as data-driven decision-making grows in importance.
+
 
 ---
 
@@ -70,6 +74,8 @@ Future enhancements could integrate quarterback performance metrics to account f
 - Pandas, NumPy
 - Matplotlib
 - Jupyter Notebook
+- Seaborn
+- Scipy
 
 
 
